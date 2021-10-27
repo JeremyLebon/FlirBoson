@@ -1,8 +1,8 @@
 # Flir Boson (USB)
 
-![Image Color Map](/Pic/Image_ColorMap.png )
 
-<img src="/Pic/Image_ColorMap.png" alt="ColorMap" width="200"/>
+
+<img src="/Pic/Image_ColorMap.png" alt="ColorMap" width="350"/>
 
 
 ## Info
@@ -188,14 +188,21 @@ def main(args):
 
 if __name__ == '__main__':
     main(sys.argv)
-
-
-
-
-
-
-
 ```
+
+Start the ROS node with following command
+````
+rosrun flir_camera read_flir_camera.py
+````
+
+
+
+Start Rviz to get the camera feed
+````
+rviz
+````
+
+<img src="Pic/CameraWithRviz.png" alt="CameraInRviz" width="350"/>
 
 
 ----
