@@ -1,5 +1,8 @@
 # Flir Boson (USB)
 
+[Image Color Map](/Pic/Image_ColorMap.png)
+
+
 ## Info
 ### Get info of camera
 Search for video objects
@@ -11,14 +14,15 @@ v4l2-ctl --device /dev/video0 --all
 v4l2-ctl --device /dev/video0 --list-formats-ext
 ```
 
-##OpenCV
+## OpenCV
 ### Read thermal camera (Python)
 
 To get the correct image of the Flir Boson camera the `YU12` has to be selected. 
 Otherwise you get a low intensity image.
 
-Other codecs can be found with following [link](https://www.fourcc.org/codecs.php)
+Other codecs can be found with the following [link](https://www.fourcc.org/codecs.php)
 
+In the example below you get the thermal image and a color image with the cv colormap feature.
 ````python
 # import the opencv library
 import cv2
@@ -104,7 +108,7 @@ cd ~/catkin_ws/src
 ```
 Create package with the command below
 ```bash
-catkin_create_pkg beginner_tutorials std_msgs sensor_msgs rospy roscpp
+catkin_create_pkg flir_camera std_msgs sensor_msgs rospy roscpp
 ```
 Go out the src directory and build your package with `catkin_make`
 ```bash
@@ -115,7 +119,84 @@ $ catkin_make
 Add a script directory in your package diretory
 
 
+```bash
+cd ~/catkin_ws/src/flir_camera
+mkdir scripts
+cd scripts
+```
+Make a python script 
 
+```bash
+touch read_flir_camera.py
+```
+Make it executable
+```bash
+chmod +x read_flir_camera.py
+```
+
+Add the following code to the python script
+
+```python
+#!/usr/bin/env python
+from __future__ import print_function
+
+import roslib
+#roslib.load_manifest('my_package')
+import sys
+import rospy
+import cv2
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
+class image_converter:
+
+  def __init__(self):
+    self.image_pub_yu12 = rospy.Publisher("image_topic_yu12",Image,queue_size=1)
+    self.image_pub_color = rospy.Publisher("image_topic_color",Image,queue_size=1)
+         
+    self.bridge = CvBridge()
+    #self.image_sub = rospy.Subscriber("image_topic",Image,self.callback)
+
+    self.vid = cv2.VideoCapture(0 + cv2.CAP_V4L2)
+    self.vid.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc(*"YU12"))  #YU12
+    self.vid.set(cv2.CAP_PROP_CONVERT_RGB,0)
+  def read(self):
+    try:
+
+      ret, frame = self.vid.read()
+    except CvBridgeError as e:
+      print(e)
+    try:
+      self.image_pub_yu12.publish(self.bridge.cv2_to_imgmsg(frame, "mono8"))
+      im_color_normed = cv2.applyColorMap(frame,cv2.COLORMAP_JET)
+      self.image_pub_color.publish(self.bridge.cv2_to_imgmsg(im_color_normed, "bgr8")) 
+    except CvBridgeError as e:
+      print(e)
+
+def main(args):
+  ic = image_converter()
+  rospy.init_node('image_converter', anonymous=True)
+  r=rospy.Rate(10)
+  while not rospy.is_shutdown():
+        ic.read()
+        r.sleep()
+  
+  cv2.destroyAllWindows()
+
+if __name__ == '__main__':
+    main(sys.argv)
+
+
+
+
+
+
+
+```
+
+
+----
 ### usb_cam ros-package (Doesn't work properly)
 
 #### Installation of usb_cam package
@@ -135,6 +216,7 @@ cd launch/
 gedit usb_cam-test.launch 
 ```
 
+----
 
 ### camera_cv package (Doesn't work properly)
 #### Installation
