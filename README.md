@@ -1,6 +1,6 @@
 # Flir Boson (USB)
 
-[Image Color Map](/Pic/Image_ColorMap.png)
+![Image Color Map](/Pic/Image_ColorMap.png)
 
 
 ## Info
