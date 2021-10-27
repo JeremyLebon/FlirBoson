@@ -1,46 +1,152 @@
-Flir Boson (USB)
------
+# Flir Boson (USB)
 
-# Read thermal camera with OpenCV (Python)
+## Info
+### Get info of camera
+Search for video objects
+
+```bash
+ls /dev/video*
+sudo apt install v4l-utils
+v4l2-ctl --device /dev/video0 --all
+v4l2-ctl --device /dev/video0 --list-formats-ext
+```
+
+##OpenCV
+### Read thermal camera (Python)
+
+To get the correct image of the Flir Boson camera the `YU12` has to be selected. 
+Otherwise you get a low intensity image.
+
+Other codecs can be found with following [link](https://www.fourcc.org/codecs.php)
+
+````python
+# import the opencv library
+import cv2
+import numpy as np
+  
+# define a video capture objec
+vid = cv2.VideoCapture(0 + cv2.CAP_V4L2)
+
+# Get info of camera
 
 
+print('WIDTH:', vid.get(cv2.CAP_PROP_FRAME_WIDTH))
+print('HEIGHT:',vid.get(cv2.CAP_PROP_FRAME_HEIGHT))
+print('FPS:',vid.get(cv2.CAP_PROP_FPS))
+print('INIT VALUE FOURCC:',vid.get(cv2.CAP_PROP_FOURCC))
+#Format needed to get to correct video feed of the Flir BOSON
+vid.set(cv2.CAP_PROP_FOURCC,cv2.VideoWriter_fourcc(*"YU12"))
+vid.set(cv2.CAP_PROP_CONVERT_RGB,0)
+
+while(True):
+    # Get frame
+    ret, frame = vid.read()
+    # Display the resulting frame
+    cv2.imshow('frame', frame)
+    # Get color map of frame
+    im_color_normed = cv2.applyColorMap(frame,cv2.COLORMAP_JET)
+    cv2.imshow('color map normed', im_color_normed)
+    
+    # the 'q' button is set as the
+    # quitting button you may use any
+    # desired button of your choice
+    if cv2.waitKey(1) & 0xFF == ord('q'):
+        break
+  
+# After the loop release the cap object
+vid.release()
+# Destroy all the windows
+cv2.destroyAllWindows()
+
+````
+
+### Read Thermal camera (C++)
+See Github of Teledyne Flir - [BosonUSB](https://github.com/FLIR/BosonUSB)
 
 
-
-
-# Get video with usc
-
+----
+##ROS
 The thermal camera can be read out with to pa 
 
-# usb_cam package
+###Own ROS package with cv_bridge
 
-##Installation of usb_cam package
+Used packages:
+*   cv_bridge package + tutorial: [Wiki](http://wiki.ros.org/cv_bridge/Tutorials/ConvertingBetweenROSImagesAndOpenCVImagesPython#Converting_OpenCV_images_to_ROS_image_messages)
+
+
+**Make catkin workspace**
+
+```bash
+mkdir -p ~/catkin_ws/src
+$ cd ~/catkin_ws/
+$ catkin_make
+```
+
+**Source your setup.bash file**
+
+```bash
+sudo nano ~/.bashrc
+```
+
+Add the following below in th .bashrc file
+
+```bash
+source ~/catkin_ws/devel/setup.bash
+```
+
+Restart your terminal!!
+
+**Make a own rospackage**
+
+Go the src directory in your catkin workspace
+```bash
+cd ~/catkin_ws/src
+```
+Create package with the command below
+```bash
+catkin_create_pkg beginner_tutorials std_msgs sensor_msgs rospy roscpp
+```
+Go out the src directory and build your package with `catkin_make`
+```bash
+cd ~/catkin_ws
+$ catkin_make
+```
+
+Add a script directory in your package diretory
+
+
+
+### usb_cam ros-package (Doesn't work properly)
+
+#### Installation of usb_cam package
+```bash
 sudo apt install ros-melodic-usb-cam
-
-##Launch usb_cam 
-
+```
+#### Launch usb_cam 
+```bash
 roslaunch usb_cam usb_cam-test.launch 
-
+```
 The launch file can be adjusted with gedit
 
 Go to package and adjust the 
-
+```bash
 roscd usb_cam
 cd launch/
 gedit usb_cam-test.launch 
+```
 
 
-
-#camera_cv package
-## Installation
+### camera_cv package (Doesn't work properly)
+#### Installation
 sudo apt install ros-melodic-cv-camera 
-##  Starting ROS node
+####  Starting ROS node
 rosrun cv_camera cv_camera_node
 
-## Make and adjusting the yaml-file
+#### Make and adjusting the yaml-file
 Go to the following directory
 /home/'user'/.ros/camera_info/camera.yaml
 
+````
 image_width: 640
 image_height: 512
 camera_name: camera
@@ -66,14 +172,14 @@ projection_matrix:
   rows: 3
   cols: 4
   data: [694.958557, 0.000000, 316.182977, 0.000000, 0.000000, 720.968750, 229.582940, 0.000000, 0.000000, 0.000000, 1.000000, 0.000000]
+````
 
 
 
-search for video objects
-ls /dev/video*
-sudo apt install v4l-utils
-v4l2-ctl --device /dev/video0 --all
-v4l2-ctl --device /dev/video0 --list-formats-ext
+Get temperature of  pixel
+https://github.com/LJMUAstroecology/flirpy/blob/master/flirpy/util/raw.py 
+
+
 
 Make own script with python to read in de FLIR camera
 
@@ -86,4 +192,6 @@ Make ROS package for FLIR camera
 
 
 
-
+#Links 
+* [flirpy](https://github.com/LJMUAstroecology/flirpy/blob/master/flirpy/util/raw.py)
+* [Teledyne Flir](https://github.com/FLIR)

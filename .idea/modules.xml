@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/.idea/FlirBoson.iml" filepath="$PROJECT_DIR$/.idea/FlirBoson.iml" />
+      <module fileurl="file://$PROJECT_DIR$/../RosDriven/.idea/RosDriven.iml" filepath="$PROJECT_DIR$/../RosDriven/.idea/RosDriven.iml" />
+    </modules>
+  </component>
+</project>
